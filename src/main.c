@@ -8,7 +8,8 @@ GtkWidget *entry;
 GtkWidget *expression_label;
 
 int 
-get_precedence(char op) {
+get_precedence(char op) 
+{
 	switch (op) {
 		case '*':
 		case '/':
@@ -22,7 +23,8 @@ get_precedence(char op) {
 }
 
 double 
-apply_operator(double val1, double val2, char op) {
+apply_operator(double val1, double val2, char op) 
+{
 	switch (op) {
 		case '+': return val1 + val2;
 		case '-': return val1 - val2;
@@ -39,7 +41,8 @@ apply_operator(double val1, double val2, char op) {
 }
 
 double 
-calculate(const char *expression) {
+calculate(const char *expression) 
+{
 	double numbers[100];
 	char operators[100];
 	int num_top = -1, op_top = -1;
@@ -90,7 +93,8 @@ calculate(const char *expression) {
 }
 
 void 
-on_button_clicked(GtkWidget *widget, gpointer data) {
+on_button_clicked(GtkWidget *widget, gpointer data) 
+{
 	const gchar *label = gtk_button_get_label(GTK_BUTTON(widget));
 	if (label == NULL) {
 		fprintf(stderr, "Error: Null label in button.\n");
@@ -122,7 +126,8 @@ on_button_clicked(GtkWidget *widget, gpointer data) {
 }
 
 int 
-main(int argc, char *argv[]) {
+main(int argc, char *argv[]) 
+{
 	GtkWidget *window;
 	GtkWidget *grid;
 	GtkWidget *button;
