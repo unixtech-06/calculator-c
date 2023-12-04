@@ -11,11 +11,19 @@
 To build the calculator, follow these steps:
 
 1. Clone the repository:
+```bash
+git clone https://github.com/unixtech-06/calculator-c.git
+```
 
 2. Navigate to the project directory:
+```bash
+cd calculator-c
+```
 
 3. Run the make command:
-
+```bash
+make
+```
 
 This will compile the source code and generate an executable.
 
