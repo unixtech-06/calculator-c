@@ -1,12 +1,10 @@
-# Makefile
-
 # コンパイラとフラグの設定
 CC = clang
 CFLAGS = `pkg-config --cflags gtk+-3.0`
 LIBS = `pkg-config --libs gtk+-3.0`
 
 # ソースファイルと出力先の設定
-SRC = src/main.c
+SRC = src/main.c src/expression_parser.c
 OUTDIR = ./bin
 TARGET = $(OUTDIR)/calculator
 

@@ -1,102 +1,11 @@
 #include <gtk/gtk.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <assert.h>
+#include "../lib/expression_parser.h"
 
 static GtkWidget *entry;
 static GtkWidget *expression_label;
 
-static int
-get_precedence(char op)
-{
-    switch (op) {
-    case '*':
-    case '/':
-        return 2;
-    case '+':
-    case '-':
-        return 1;
-    default:
-        return 0;
-    }
-}
-
-static double
-apply_operator(double val1, double val2, char op)
-{
-    switch (op) {
-    case '+': return val1 + val2;
-    case '-': return val1 - val2;
-    case '*': return val1 * val2;
-    case '/': 
-        if (val2 == 0) {
-            fprintf(stderr, "Error: Division by zero.\n");
-            return 0.0;
-        }
-        return val1 / val2;
-    default: 
-        return 0.0;
-    }
-}
-
-static double
-calculate(const char *expression)
-{
-    double numbers[100];
-    char operators[100];
-    int num_top = -1, op_top = -1;
-
-    for (int i = 0; expression[i] != '\0'; i++) {
-        if (isspace(expression[i]))
-            continue;
-
-        if (isdigit(expression[i])) {
-            double value = 0;
-            while (isdigit(expression[i])) {
-                value = value * 10 + (expression[i] - '0');
-                i++;
-            }
-            i--;
-            numbers[++num_top] = value;
-        } else if (expression[i] == '(') {
-            operators[++op_top] = expression[i];
-        } else if (expression[i] == ')') {
-            while (op_top != -1 && operators[op_top] != '(') {
-                double val2 = numbers[num_top--];
-                double val1 = numbers[num_top--];
-                char op = operators[op_top--];
-
-                numbers[++num_top] = apply_operator(val1, val2, op);
-            }
-            op_top--;
-        } else {
-            while (op_top != -1 && 
-                   get_precedence(operators[op_top]) >= get_precedence(expression[i])) {
-                double val2 = numbers[num_top--];
-                double val1 = numbers[num_top--];
-                char op = operators[op_top--];
-
-                numbers[++num_top] = apply_operator(val1, val2, op);
-            }
-            operators[++op_top] = expression[i];
-        }
-    }
-
-    while (op_top != -1) {
-        double val2 = numbers[num_top--];
-        double val1 = numbers[num_top--];
-        char op = operators[op_top--];
-
-        numbers[++num_top] = apply_operator(val1, val2, op);
-    }
-
-    return numbers[num_top];
-}
-
-static void
-on_button_clicked(GtkWidget *widget, gpointer data)
+static 
+void on_button_clicked(GtkWidget *widget, gpointer data) 
 {
     const gchar *label = gtk_button_get_label(GTK_BUTTON(widget));
     if (label == NULL) {
@@ -113,7 +22,7 @@ on_button_clicked(GtkWidget *widget, gpointer data)
     if (strcmp(label, "=") == 0) {
         gtk_label_set_text(GTK_LABEL(expression_label), current_text);
 
-        double result = calculate(current_text);
+        double result = calculate_with_parentheses(current_text);
         char result_str[64];
         snprintf(result_str, sizeof(result_str), "%f", result);
         gtk_entry_set_text(GTK_ENTRY(entry), result_str);
@@ -128,8 +37,8 @@ on_button_clicked(GtkWidget *widget, gpointer data)
     }
 }
 
-int
-main(int argc, char *argv[])
+int 
+main(int argc, char *argv[]) 
 {
     GtkWidget *window;
     GtkWidget *grid;
@@ -138,16 +47,12 @@ main(int argc, char *argv[])
         "7", "8", "9", "/",
         "4", "5", "6", "*",
         "1", "2", "3", "-",
-        "0", ".", "=", "+"};
-    int i, j;
+        "0", ".", "(", ")",
+        "C", "=", "+", ""}; // 括弧とクリアボタンを追加
 
     gtk_init(&argc, &argv);
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    if (window == NULL) {
-        fprintf(stderr, "Error: Failed to create window.\n");
-        return 1;
-    }
     gtk_window_set_title(GTK_WINDOW(window), "Calculator");
     gtk_container_set_border_width(GTK_CONTAINER(window), 10);
     gtk_window_set_default_size(GTK_WINDOW(window), 300, 250);
@@ -162,8 +67,9 @@ main(int argc, char *argv[])
     entry = gtk_entry_new();
     gtk_grid_attach(GTK_GRID(grid), entry, 0, 1, 4, 1);
 
-    for (i = 0; i < 4; ++i) {
-        for (j = 0; j < 4; ++j) {
+    for (int i = 0; i < 5; ++i) { // 行数を5に増やす
+        for (int j = 0; j < 4; ++j) {
+            if (*buttons[i * 4 + j] == '\0') continue; // 空文字列の場合はボタンを作成しない
             button = gtk_button_new_with_label(buttons[i * 4 + j]);
             g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), NULL);
             gtk_grid_attach(GTK_GRID(grid), button, j, i + 2, 1, 1);
@@ -174,8 +80,6 @@ main(int argc, char *argv[])
     gtk_widget_show_all(window);
     gtk_main();
 
-    // Check for memory leak
-    system("leaks ./calculator");
     return 0;
 }
 
