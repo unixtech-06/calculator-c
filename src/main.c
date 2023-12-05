@@ -30,7 +30,6 @@
  * File: main.c
  */
 
-
 #include <gtk/gtk.h>
 #include <string.h>
 #include <stdlib.h>
@@ -38,6 +37,7 @@
 #include <ctype.h>
 
 #define INITIAL_STACK_SIZE 100
+#define STACK_RESIZE_FACTOR 2
 
 static GtkWidget *entry;
 static GtkWidget *expression_label;
@@ -63,31 +63,36 @@ apply_operator(double val1, double val2, char op, int *error)
 	*error = 0; /* Reset error flag */
 
 	switch (op) {
-	case '+': return val1 + val2;
-	case '-': return val1 - val2;
-	case '*': return val1 * val2;
-	case '/': 
+	case '+':
+		return val1 + val2;
+	case '-':
+		return val1 - val2;
+	case '*':
+		return val1 * val2;
+	case '/':
 		if (val2 == 0) {
 			fprintf(stderr, "Error: Division by zero.\n");
 			*error = 1; /* Set error flag */
 			return 0.0;
 		}
 		return val1 / val2;
-	default: 
+	default:
 		*error = 1; /* Set error flag for unknown operator */
 		return 0.0;
 	}
 }
 
 static void 
-resize_stack(double **stack, int *size) 
+resize_stack(void **stack, int *size, size_t element_size) 
 {
-	*size *= 2;
-	*stack = realloc(*stack, *size * sizeof(double));
-	if (*stack == NULL) {
+	int new_size = *size * STACK_RESIZE_FACTOR;
+	void *new_stack = realloc(*stack, new_size * element_size);
+	if (new_stack == NULL) {
 		fprintf(stderr, "Error: Stack memory allocation failed.\n");
 		exit(EXIT_FAILURE);
 	}
+	*stack = new_stack;
+	*size = new_size;
 }
 
 static double 
@@ -117,12 +122,12 @@ calculate_with_parentheses(const char *expression)
 			}
 			i--;
 			if (num_top == stack_size - 1) {
-				resize_stack(&numbers, &stack_size);
+				resize_stack((void **)&numbers, &stack_size, sizeof(double));
 			}
 			numbers[++num_top] = value;
 		} else if (expression[i] == '(') {
 			if (op_top == stack_size - 1) {
-				resize_stack((double **)&operators, &stack_size);
+				resize_stack((void **)&operators, &stack_size, sizeof(char));
 			}
 			operators[++op_top] = expression[i];
 			open_parentheses++;
@@ -133,7 +138,7 @@ calculate_with_parentheses(const char *expression)
 				char op = operators[op_top--];
 
 				if (num_top == stack_size - 1) {
-					resize_stack(&numbers, &stack_size);
+					resize_stack((void **)&numbers, &stack_size, sizeof(double));
 				}
 				numbers[++num_top] = apply_operator(val1, val2, op, &error_flag);
 				if (error_flag) {
@@ -155,7 +160,7 @@ calculate_with_parentheses(const char *expression)
 				char op = operators[op_top--];
 
 				if (num_top == stack_size - 1) {
-					resize_stack(&numbers, &stack_size);
+					resize_stack((void **)&numbers, &stack_size, sizeof(double));
 				}
 				numbers[++num_top] = apply_operator(val1, val2, op, &error_flag);
 				if (error_flag) {
@@ -166,7 +171,7 @@ calculate_with_parentheses(const char *expression)
 				}
 			}
 			if (op_top == stack_size - 1) {
-				resize_stack((double **)&operators, &stack_size);
+				resize_stack((void **)&operators, &stack_size, sizeof(char));
 			}
 			operators[++op_top] = expression[i];
 		}
@@ -185,7 +190,7 @@ calculate_with_parentheses(const char *expression)
 		char op = operators[op_top--];
 
 		if (num_top == stack_size - 1) {
-			resize_stack(&numbers, &stack_size);
+			resize_stack((void **)&numbers, &stack_size, sizeof(double));
 		}
 		numbers[++num_top] = apply_operator(val1, val2, op, &error_flag);
 		if (error_flag) {
@@ -201,7 +206,6 @@ calculate_with_parentheses(const char *expression)
 	free(operators);
 	return result;
 }
-
 
 static void 
 on_button_clicked(GtkWidget *widget, gpointer data)
@@ -244,7 +248,6 @@ on_button_clicked(GtkWidget *widget, gpointer data)
 		g_free(new_text);
 	}
 }
-
 
 int 
 main(int argc, char *argv[])
