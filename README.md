@@ -7,6 +7,7 @@
 - C compiler (e.g., GCC, Clang)
 - Make (for building the project)
 - GTK+3
+- pkg-config
 
 ## Building the Project
 To build the calculator, follow these steps:
