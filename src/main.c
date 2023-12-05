@@ -218,6 +218,15 @@ on_button_clicked(GtkWidget *widget, gpointer data)
         return;
     }
 
+    // Validate the input expression
+    for (int i = 0; current_text[i] != '\0'; i++) {
+        if (!isdigit(current_text[i]) && !isspace(current_text[i]) &&
+            strchr("+-*/()", current_text[i]) == NULL) {
+            fprintf(stderr, "Error: Invalid input character '%c'.\n", current_text[i]);
+            return;
+        }
+    }
+
     if (strcmp(label, "=") == 0) {
         gtk_label_set_text(GTK_LABEL(expression_label), current_text);
 
