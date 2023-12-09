@@ -85,7 +85,7 @@ apply_operator(double val1, double val2, char op, int *error)
 static void 
 resize_stack(void **stack, int *size, size_t element_size) 
 {
-	int new_size = *size * STACK_RESIZE_FACTOR;
+	const int new_size = *size * STACK_RESIZE_FACTOR;
 	void *new_stack = realloc(*stack, new_size * element_size);
 	if (new_stack == NULL) {
 		fprintf(stderr, "Error: Stack memory allocation failed.\n");
@@ -133,9 +133,9 @@ calculate_with_parentheses(const char *expression)
 			open_parentheses++;
 		} else if (expression[i] == ')') {
 			while (op_top != -1 && operators[op_top] != '(') {
-				double val2 = numbers[num_top--];
-				double val1 = numbers[num_top--];
-				char op = operators[op_top--];
+				const double val2 = numbers[num_top--];
+				const double val1 = numbers[num_top--];
+				const char op = operators[op_top--];
 
 				if (num_top == stack_size - 1) {
 					resize_stack((void **)&numbers, &stack_size, sizeof(double));
@@ -155,9 +155,9 @@ calculate_with_parentheses(const char *expression)
 		} else {
 			while (op_top != -1 && 
 				   get_precedence(operators[op_top]) >= get_precedence(expression[i])) {
-				double val2 = numbers[num_top--];
-				double val1 = numbers[num_top--];
-				char op = operators[op_top--];
+				const double val2 = numbers[num_top--];
+				const double val1 = numbers[num_top--];
+				const char op = operators[op_top--];
 
 				if (num_top == stack_size - 1) {
 					resize_stack((void **)&numbers, &stack_size, sizeof(double));
@@ -185,9 +185,9 @@ calculate_with_parentheses(const char *expression)
 	}
 
 	while (op_top != -1) {
-		double val2 = numbers[num_top--];
-		double val1 = numbers[num_top--];
-		char op = operators[op_top--];
+		const double val2 = numbers[num_top--];
+		const double val1 = numbers[num_top--];
+		const char op = operators[op_top--];
 
 		if (num_top == stack_size - 1) {
 			resize_stack((void **)&numbers, &stack_size, sizeof(double));
@@ -201,7 +201,7 @@ calculate_with_parentheses(const char *expression)
 		}
 	}
 
-	double result = numbers[num_top];
+	const double result = numbers[num_top];
 	free(numbers);
 	free(operators);
 	return result;
@@ -234,7 +234,7 @@ on_button_clicked(GtkWidget *widget, gpointer data)
 	if (strcmp(label, "=") == 0) {
 		gtk_label_set_text(GTK_LABEL(expression_label), current_text);
 
-		double result = calculate_with_parentheses(current_text);
+		const double result = calculate_with_parentheses(current_text);
 		char result_str[64];
 		snprintf(result_str, sizeof(result_str), "%f", result);
 		gtk_entry_set_text(GTK_ENTRY(entry), result_str);
@@ -252,9 +252,6 @@ on_button_clicked(GtkWidget *widget, gpointer data)
 int 
 main(int argc, char *argv[])
 {
-	GtkWidget *window;
-	GtkWidget *grid;
-	GtkWidget *button;
 	const gchar *buttons[] = {
 		"7", "8", "9", "/",
 		"4", "5", "6", "*",
@@ -265,12 +262,12 @@ main(int argc, char *argv[])
 
 	gtk_init(&argc, &argv);
 
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window), "Calculator");
 	gtk_container_set_border_width(GTK_CONTAINER(window), 10);
 	gtk_window_set_default_size(GTK_WINDOW(window), 300, 250);
 
-	grid = gtk_grid_new();
+	GtkWidget* grid = gtk_grid_new();
 	gtk_container_add(GTK_CONTAINER(window), grid);
 
 	expression_label = gtk_label_new("");
@@ -284,7 +281,7 @@ main(int argc, char *argv[])
 		for (int j = 0; j < 4; ++j) {
 			if (*buttons[i * 4 + j] == '\0') 
 				continue;
-			button = gtk_button_new_with_label(buttons[i * 4 + j]);
+			GtkWidget* button = gtk_button_new_with_label(buttons[i * 4 + j]);
 			g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), NULL);
 			gtk_grid_attach(GTK_GRID(grid), button, j, i + 2, 1, 1);
 		}

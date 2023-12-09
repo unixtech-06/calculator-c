@@ -85,7 +85,7 @@ apply_operator(double val1, double val2, char op, int *error)
 static void
 resize_stack(void **stack, int *size, size_t element_size)
 {
-	int new_size = *size * STACK_RESIZE_FACTOR;
+	const int new_size = *size * STACK_RESIZE_FACTOR;
 	void *new_stack = realloc(*stack, new_size * element_size);
 	if (new_stack == NULL)
 	{
@@ -145,9 +145,9 @@ calculate_with_parentheses(const char *expression)
 		{
 			while (op_top != -1 && operators[op_top] != '(')
 			{
-				double val2 = numbers[num_top--];
-				double val1 = numbers[num_top--];
-				char op = operators[op_top--];
+				const double val2 = numbers[num_top--];
+				const double val1 = numbers[num_top--];
+				const char op = operators[op_top--];
 
 				if (num_top == stack_size - 1)
 				{
@@ -173,9 +173,9 @@ calculate_with_parentheses(const char *expression)
 			while (op_top != -1 &&
 				   get_precedence(operators[op_top]) >= get_precedence(expression[i]))
 			{
-				double val2 = numbers[num_top--];
-				double val1 = numbers[num_top--];
-				char op = operators[op_top--];
+				const double val2 = numbers[num_top--];
+				const double val1 = numbers[num_top--];
+				const char op = operators[op_top--];
 
 				if (num_top == stack_size - 1)
 				{
@@ -208,9 +208,9 @@ calculate_with_parentheses(const char *expression)
 
 	while (op_top != -1)
 	{
-		double val2 = numbers[num_top--];
-		double val1 = numbers[num_top--];
-		char op = operators[op_top--];
+		const double val2 = numbers[num_top--];
+		const double val1 = numbers[num_top--];
+		const char op = operators[op_top--];
 
 		if (num_top == stack_size - 1)
 		{
@@ -226,7 +226,7 @@ calculate_with_parentheses(const char *expression)
 		}
 	}
 
-	double result = numbers[num_top];
+	const double result = numbers[num_top];
 	free(numbers);
 	free(operators);
 	return result;
