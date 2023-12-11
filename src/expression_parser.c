@@ -30,7 +30,7 @@
  * File: expression_parser.c
  */
 
-#include "../lib/expression_parser.h"
+#include "../include/expression_parser.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
