@@ -1,0 +1,4 @@
+/Users/ryosuke/CLionProjects/calculator-c に生成できません
+互換性のないジェネレーター 'Unix Makefiles' で作成されました'
+
+手動で削除するか別の生成ディレクトリを選択してください
